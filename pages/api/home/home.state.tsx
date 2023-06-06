@@ -41,7 +41,7 @@ export const initialState: HomeInitialState = {
   selectedConversation: undefined,
   currentMessage: undefined,
   prompts: [],
-  showPromptbar: true,
+  showPromptbar: false,
   showChatbar: true,
   currentFolder: undefined,
   messageError: false,

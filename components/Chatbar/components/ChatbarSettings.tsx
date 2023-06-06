@@ -17,10 +17,10 @@ export const ChatbarSettings = () => {
 
   const {
     state: {
-      apiKey,
+      // apiKey,
       lightMode,
-      serverSideApiKeyIsSet,
-      serverSidePluginKeysSet,
+      // serverSideApiKeyIsSet,
+      // serverSidePluginKeysSet,
       conversations,
     },
     dispatch: homeDispatch,
@@ -61,11 +61,11 @@ export const ChatbarSettings = () => {
         }
       />
 
-      {!serverSideApiKeyIsSet ? (
-        <Key apiKey={apiKey} onApiKeyChange={handleApiKeyChange} />
-      ) : null}
+      {/*{!serverSideApiKeyIsSet ? (*/}
+      {/*  <Key apiKey={apiKey} onApiKeyChange={handleApiKeyChange} />*/}
+      {/*) : null}*/}
 
-      {!serverSidePluginKeysSet ? <PluginKeys /> : null}
+      {/*{!serverSidePluginKeysSet ? <PluginKeys /> : null}*/}
     </div>
   );
 };

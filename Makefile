@@ -1,18 +1,18 @@
 include .env
 
+HEROKU_APP = gptweet-frontend
+
 .PHONY: all
 
-build:
-	docker build -t chatbot-ui .
+heroku-push:
+	docker buildx build --platform linux/amd64 -t ${HEROKU_APP} .
+	docker tag ${HEROKU_APP} registry.heroku.com/${HEROKU_APP}/web
+	docker push registry.heroku.com/${HEROKU_APP}/web
+	heroku container:release web -a ${HEROKU_APP}
 
-run:
-	export $(cat .env | xargs)
-	docker stop chatbot-ui || true && docker rm chatbot-ui || true
-	docker run --name chatbot-ui --rm -e OPENAI_API_KEY=${OPENAI_API_KEY} -p 3000:3000 chatbot-ui
+heroku-config:
+	heroku config:set -a ${HEROKU_APP} $(shell cat .env | sed -e 's/[\r\n]//g' -e 's/^/ /')
+	heroku config:set -a ${HEROKU_APP} NEXT_PUBLIC_CLIENT_DOMAIN=https://www.rolebotics.com NEXT_PUBLIC_SERVER_DOMAIN=https://gptweet.rolebotics.com
 
-logs:
-	docker logs -f chatbot-ui
-
-push:
-	docker tag chatbot-ui:latest ${DOCKER_USER}/chatbot-ui:${DOCKER_TAG}
-	docker push ${DOCKER_USER}/chatbot-ui:${DOCKER_TAG}
+heroku-login:
+	heroku container:login

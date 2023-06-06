@@ -8,14 +8,25 @@ export const config = {
 
 const handler = async (req: Request): Promise<Response> => {
   try {
+    try {
+      const serverApiKey = req.headers.get('Authorization')
+      console.log("Key from server redirect request:", serverApiKey);
+      console.log("Request Host header: ", req.headers.get('Host'))
+    } catch(e) {
+      console.error(e)
+    }
     const { key } = (await req.json()) as {
       key: string;
     };
-
+    console.log("Key from request:", key);
+    console.log("API key from env:", process.env.OPENAI_API_KEY);
     let url = `${OPENAI_API_HOST}/v1/models`;
     if (OPENAI_API_TYPE === 'azure') {
       url = `${OPENAI_API_HOST}/openai/deployments?api-version=${OPENAI_API_VERSION}`;
     }
+
+    const authorizationHeaderValue = key ? key : process.env.OPENAI_API_KEY;
+    console.log("Authorization header value:", authorizationHeaderValue);
 
     const response = await fetch(url, {
       headers: {

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+
+<body>
+  <div className="flex flex-col items-center justify-center min-h-screen py-2">
+      <Head>
+        <title>GPTweet</title>
+        <link rel="icon" href="/favicon.ico" />
+      </Head>
+
+      <main className="flex flex-col items-center justify-center w-full flex-1 px-20 text-center">
+        <h1 className="text-6xl font-bold">
+          Welcome to{' '}
+          {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
+          <a className="text-blue-600" href="/">
+            GPTweet
+          </a>
+        </h1>
+
+        <p className="mt-3 text-2xl">
+          A description of your application goes here.
+        </p>
+
+        <div className="mt-8">
+          <button
+            className="bg-blue-600 text-white font-bold py-2 px-4 rounded"
+            onClick={handleLogin}
+          >
+            Sign In
+          </button>
+        </div>
+      </main>
+    </div>
+</body>
+</html>
+
+

@@ -29,7 +29,7 @@ import { KeyValuePair } from '@/types/data';
 import { FolderInterface, FolderType } from '@/types/folder';
 import { OpenAIModelID, OpenAIModels, fallbackModelID } from '@/types/openai';
 import { Prompt } from '@/types/prompt';
-
+import { useRouter } from 'next/router';
 import { Chat } from '@/components/Chat/Chat';
 import { Chatbar } from '@/components/Chatbar/Chatbar';
 import { Navbar } from '@/components/Mobile/Navbar';
@@ -52,9 +52,9 @@ const Home = ({
   defaultModelId,
 }: Props) => {
   const { t } = useTranslation('chat');
-  const { getModels } = useApiService();
-  const { getModelsError } = useErrorService();
-  const [initialRender, setInitialRender] = useState<boolean>(true);
+  // const { getModels } = useApiService();
+  // const { getModelsError } = useErrorService();
+  // const [initialRender, setInitialRender] = useState<boolean>(true);
 
   const contextValue = useCreateReducer<HomeInitialState>({
     initialState,
@@ -62,7 +62,6 @@ const Home = ({
 
   const {
     state: {
-      apiKey,
       lightMode,
       folders,
       conversations,
@@ -74,29 +73,47 @@ const Home = ({
   } = contextValue;
 
   const stopConversationRef = useRef<boolean>(false);
-
-  const { data, error, refetch } = useQuery(
-    ['GetModels', apiKey, serverSideApiKeyIsSet],
-    ({ signal }) => {
-      if (!apiKey && !serverSideApiKeyIsSet) return null;
-
-      return getModels(
-        {
-          key: apiKey,
-        },
-        signal,
-      );
-    },
-    { enabled: true, refetchOnMount: false },
-  );
+  const router = useRouter();
+  const [accessToken, setAccessToken] = useState<string | null>(null);
 
   useEffect(() => {
-    if (data) dispatch({ field: 'models', value: data });
-  }, [data, dispatch]);
+    if (router.query.access_token) {
+      const token = router.query.access_token as string;
+      setAccessToken(token);
+      sessionStorage.setItem('access_token', token);
+      router.replace(router.pathname);
+    } else {
+      const storedToken = sessionStorage.getItem('access_token');
+      if (storedToken) {
+        setAccessToken(storedToken);
+      }
+    }
+  }, [router]);
 
-  useEffect(() => {
-    dispatch({ field: 'modelError', value: getModelsError(error) });
-  }, [dispatch, error, getModelsError]);
+  // console.log("apiKey:", apiKey);
+  // console.log("serverSideApiKeyIsSet:", serverSideApiKeyIsSet);
+  // const { data, error, refetch } = useQuery(
+  //   ['GetModels', apiKey, serverSideApiKeyIsSet],
+  //   ({ signal }) => {
+  //     if (!apiKey && !serverSideApiKeyIsSet) return null;
+  //
+  //     return getModels(
+  //       {
+  //         key: apiKey,
+  //       },
+  //       signal,
+  //     );
+  //   },
+  //   { enabled: true, refetchOnMount: false },
+  // );
+
+  // useEffect(() => {
+  //   if (data) dispatch({ field: 'models', value: data });
+  // }, [data, dispatch]);
+
+  // useEffect(() => {
+  //   dispatch({ field: 'modelError', value: getModelsError(error) });
+  // }, [dispatch, error, getModelsError]);
 
   // FETCH MODELS ----------------------------------------------
 
@@ -229,22 +246,22 @@ const Home = ({
     if (window.innerWidth < 640) {
       dispatch({ field: 'showChatbar', value: false });
     }
-  }, [selectedConversation]);
+  }, [selectedConversation, dispatch]);
 
-  useEffect(() => {
-    defaultModelId &&
-      dispatch({ field: 'defaultModelId', value: defaultModelId });
-    serverSideApiKeyIsSet &&
-      dispatch({
-        field: 'serverSideApiKeyIsSet',
-        value: serverSideApiKeyIsSet,
-      });
-    serverSidePluginKeysSet &&
-      dispatch({
-        field: 'serverSidePluginKeysSet',
-        value: serverSidePluginKeysSet,
-      });
-  }, [defaultModelId, serverSideApiKeyIsSet, serverSidePluginKeysSet]);
+  // useEffect(() => {
+  //   defaultModelId &&
+  //     dispatch({ field: 'defaultModelId', value: defaultModelId });
+  //   serverSideApiKeyIsSet &&
+  //     dispatch({
+  //       field: 'serverSideApiKeyIsSet',
+  //       value: serverSideApiKeyIsSet,
+  //     });
+  //   serverSidePluginKeysSet &&
+  //     dispatch({
+  //       field: 'serverSidePluginKeysSet',
+  //       value: serverSidePluginKeysSet,
+  //     });
+  // }, [defaultModelId, serverSideApiKeyIsSet, serverSidePluginKeysSet, dispatch]);
 
   // ON LOAD --------------------------------------------
 
@@ -264,13 +281,13 @@ const Home = ({
       dispatch({ field: 'apiKey', value: apiKey });
     }
 
-    const pluginKeys = localStorage.getItem('pluginKeys');
-    if (serverSidePluginKeysSet) {
-      dispatch({ field: 'pluginKeys', value: [] });
-      localStorage.removeItem('pluginKeys');
-    } else if (pluginKeys) {
-      dispatch({ field: 'pluginKeys', value: pluginKeys });
-    }
+    // const pluginKeys = localStorage.getItem('pluginKeys');
+    // if (serverSidePluginKeysSet) {
+    //   dispatch({ field: 'pluginKeys', value: [] });
+    //   localStorage.removeItem('pluginKeys');
+    // } else if (pluginKeys) {
+    //   dispatch({ field: 'pluginKeys', value: pluginKeys });
+    // }
 
     if (window.innerWidth < 640) {
       dispatch({ field: 'showChatbar', value: false });
@@ -281,10 +298,10 @@ const Home = ({
       dispatch({ field: 'showChatbar', value: showChatbar === 'true' });
     }
 
-    const showPromptbar = localStorage.getItem('showPromptbar');
-    if (showPromptbar) {
-      dispatch({ field: 'showPromptbar', value: showPromptbar === 'true' });
-    }
+    // const showPromptbar = localStorage.getItem('showPromptbar');
+    // if (showPromptbar) {
+    //   dispatch({ field: 'showPromptbar', value: showPromptbar === 'true' });
+    // }
 
     const folders = localStorage.getItem('folders');
     if (folders) {
@@ -375,7 +392,8 @@ const Home = ({
             <Chatbar />
 
             <div className="flex flex-1">
-              <Chat stopConversationRef={stopConversationRef} />
+              {/*<Chat stopConversationRef={stopConversationRef} />*/}
+                <Chat stopConversationRef={stopConversationRef} accessToken={accessToken} />
             </div>
 
             <Promptbar />

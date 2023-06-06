@@ -10,6 +10,7 @@ RUN npm ci
 # ---- Build ----
 FROM dependencies AS build
 COPY . .
+RUN npm install
 RUN npm run build
 
 # ---- Production ----
@@ -21,9 +22,10 @@ COPY --from=build /app/public ./public
 COPY --from=build /app/package*.json ./
 COPY --from=build /app/next.config.js ./next.config.js
 COPY --from=build /app/next-i18next.config.js ./next-i18next.config.js
+COPY --from=build /app/server.js ./server.js
 
 # Expose the port the app will run on
 EXPOSE 3000
 
 # Start the application
-CMD ["npm", "start"]
+CMD ["node", "server.js"]
